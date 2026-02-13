@@ -1,156 +1,68 @@
-<!doctype html>
-<html lang="ru">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Тест: Penetration Testing</title>
-  <style>
-    :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; line-height: 1.35; }
-    body { margin: 0; padding: 18px; background: #fff; color: #111; }
-    h1 { font-size: 18px; margin: 0 0 12px; }
-    .card { border: 1px solid #e5e5e5; border-radius: 10px; padding: 14px; margin: 10px 0; }
-    .q { font-weight: 600; margin-bottom: 10px; }
-    .opt { display: block; padding: 8px 10px; margin: 6px 0; border: 1px solid #eee; border-radius: 8px; cursor: pointer; }
-    .opt:hover { background: #fafafa; }
-    .opt input { margin-right: 8px; }
-    .actions { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
-    button { padding: 10px 12px; border: 1px solid #ddd; background: #f7f7f7; border-radius: 10px; cursor: pointer; }
-    button:hover { background: #f0f0f0; }
-    .result { margin-top: 14px; padding: 12px; border-radius: 10px; border: 1px solid #eee; background: #fcfcfc; }
-    .good { color: #0a7a2f; font-weight: 700; }
-    .bad { color: #b00020; font-weight: 700; }
-    .muted { color:#666; font-size: 13px; }
-  </style>
-</head>
-<body>
-  <h1>Промежуточные вопросы к модулю <span style="white-space:nowrap;">Penetration Testing</span></h1>
+<script>
+  const SALT = "soc-quiz-v1::diasik17";
+  const EXPECTED_HASH = "REPLACE_WITH_HASH";
 
-  <form id="quiz">
-    <div class="card" data-q="1">
-      <div class="q">1. Что такое пентест (Penetration testing)?</div>
-      <label class="opt"><input type="radio" name="q1" value="a">Процесс разработки программного обеспечения</label>
-      <label class="opt"><input type="radio" name="q1" value="b">Контролируемая имитация атаки на систему для выявления уязвимостей</label>
-      <label class="opt"><input type="radio" name="q1" value="c">Тестирование скорости сети</label>
-      <label class="opt"><input type="radio" name="q1" value="d">Анализ пользовательского интерфейса</label>
-    </div>
+  function selected(name) {
+    const el = document.querySelector("input[name='" + name + "']:checked");
+    return el ? el.value : "";
+  }
 
-    <div class="card" data-q="2">
-      <div class="q">2. Какой этап пентеста включает поиск открытых портов и версий ПО?</div>
-      <label class="opt"><input type="radio" name="q2" value="a">Разведка</label>
-      <label class="opt"><input type="radio" name="q2" value="b">Эксплуатация</label>
-      <label class="opt"><input type="radio" name="q2" value="c">Сканирование</label>
-      <label class="opt"><input type="radio" name="q2" value="d">Постэксплуатация</label>
-    </div>
+  async function sha256Hex(str) {
+    const data = new TextEncoder().encode(str);
+    const digest = await crypto.subtle.digest("SHA-256", data);
+    return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
+  }
 
-    <div class="card" data-q="3">
-      <div class="q">3. Какой инструмент используется для сканирования сетей и аудита безопасности?</div>
-      <label class="opt"><input type="radio" name="q3" value="a">BurpSuite</label>
-      <label class="opt"><input type="radio" name="q3" value="b">Nmap</label>
-      <label class="opt"><input type="radio" name="q3" value="c">Dirsearch</label>
-      <label class="opt"><input type="radio" name="q3" value="d">ExploitDB</label>
-    </div>
+  document.getElementById("check").addEventListener("click", async () => {
+    const payload = {
+      q1: selected("q1"),
+      q2: selected("q2"),
+      q3: selected("q3"),
+      q4: selected("q4"),
+      q5: selected("q5"),
+    };
 
-    <div class="card" data-q="4">
-      <div class="q">4. Какая основная функция BurpSuite?</div>
-      <label class="opt"><input type="radio" name="q4" value="a">Сканирование портов</label>
-      <label class="opt"><input type="radio" name="q4" value="b">Перехват и анализ веб-трафика</label>
-      <label class="opt"><input type="radio" name="q4" value="c">Поиск открытых сервисов</label>
-      <label class="opt"><input type="radio" name="q4" value="d">Управление правами доступа</label>
-    </div>
-
-    <div class="card" data-q="5">
-      <div class="q">5. Какой инструмент не относится к фаззингу директорий и файлов?</div>
-      <label class="opt"><input type="radio" name="q5" value="a">Gobuster</label>
-      <label class="opt"><input type="radio" name="q5" value="b">ffuf</label>
-      <label class="opt"><input type="radio" name="q5" value="c">Dirsearch</label>
-      <label class="opt"><input type="radio" name="q5" value="d">Nmap</label>
-    </div>
-
-    <div class="actions">
-      <button type="button" id="check">Проверить</button>
-      <button type="reset" id="reset">Сбросить</button>
-    </div>
-
-    <div class="result" id="result" aria-live="polite" style="display:none;"></div>
-    <div class="muted" style="margin-top:8px;">
-      Проверка выполняется на сервере (правильные ответы не лежат в браузере).
-    </div>
-  </form>
-
-  <script>
-    // ВАЖНО: здесь нет правильных ответов.
-    // Нужно вставить URL твоего Cloudflare Worker (сделаем ниже).
-    const API_URL = "PASTE_WORKER_URL_HERE";
-
-    function selected(name) {
-      const el = document.querySelector("input[name='" + name + "']:checked");
-      return el ? el.value : null;
-    }
-
-    document.getElementById("check").addEventListener("click", async () => {
-      const payload = {
-        q1: selected("q1"),
-        q2: selected("q2"),
-        q3: selected("q3"),
-        q4: selected("q4"),
-        q5: selected("q5"),
-      };
-
-      // подсветка пропусков
-      Object.keys(payload).forEach((q) => {
-        const n = q.replace("q", "");
-        const card = document.querySelector(".card[data-q='" + n + "']");
-        if (!payload[q]) {
-          card.style.borderColor = "#f2c0c0";
-          card.style.background = "#fffafa";
-        }
-      });
-
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const text = await res.text();
-        alert("Ошибка проверки: " + text);
-        return;
+    Object.keys(payload).forEach((q) => {
+      const n = q.replace("q", "");
+      const card = document.querySelector(".card[data-q='" + n + "']");
+      if (!payload[q]) {
+        card.style.borderColor = "#f2c0c0";
+        card.style.background = "#fffafa";
       }
-
-      const data = await res.json(); // {score, total, wrong:["q2"...]}
-      const wrongSet = new Set(data.wrong || []);
-
-      // подсветка карточек
-      ["q1","q2","q3","q4","q5"].forEach((q) => {
-        const n = q.replace("q", "");
-        const card = document.querySelector(".card[data-q='" + n + "']");
-        const isWrong = wrongSet.has(q);
-        card.style.borderColor = isWrong ? "#f2c0c0" : "#bfe7c9";
-        card.style.background = isWrong ? "#fffafa" : "#fbfffc";
-      });
-
-      const percent = Math.round((data.score / data.total) * 100);
-      const resultEl = document.getElementById("result");
-      resultEl.style.display = "block";
-      resultEl.innerHTML =
-        "<div><strong>Результат:</strong> " + data.score + " из " + data.total + " (" + percent + "%)</div>" +
-        "<div style='margin-top:8px;'>" +
-          (data.score === data.total
-            ? "<span class='good'>Отлично! Все ответы верные.</span>"
-            : "<span class='bad'>Есть ошибки — проверь выделенные вопросы.</span>") +
-        "</div>";
     });
 
-    document.getElementById("reset").addEventListener("click", () => {
-      const resultEl = document.getElementById("result");
-      resultEl.style.display = "none";
-      document.querySelectorAll(".card").forEach(card => {
-        card.style.borderColor = "#e5e5e5";
-        card.style.background = "#fff";
-      });
-    });
-  </script>
-</body>
-</html>
+    if (Object.values(payload).some(v => !v)) return;
 
+    const canonical =
+      `q1=${payload.q1}|q2=${payload.q2}|q3=${payload.q3}|q4=${payload.q4}|q5=${payload.q5}`;
+    const hash = await sha256Hex(SALT + "::" + canonical);
+
+    const okAll = (hash === EXPECTED_HASH);
+
+    document.querySelectorAll(".card").forEach(card => {
+      card.style.borderColor = okAll ? "#bfe7c9" : "#f2c0c0";
+      card.style.background = okAll ? "#fbfffc" : "#fffafa";
+    });
+
+    const resultEl = document.getElementById("result");
+    resultEl.style.display = "block";
+    resultEl.innerHTML =
+      "<div><strong>Результат:</strong> " +
+      (okAll ? "5 из 5 (100%)" : "есть ошибки") +
+      "</div>" +
+      "<div style='margin-top:8px;'>" +
+      (okAll
+        ? "<span class='good'>Отлично! Все ответы верные.</span>"
+        : "<span class='bad'>Есть ошибки — проверь ответы и попробуй снова.</span>") +
+      "</div>";
+  });
+
+  document.getElementById("reset").addEventListener("click", () => {
+    const resultEl = document.getElementById("result");
+    resultEl.style.display = "none";
+    document.querySelectorAll(".card").forEach(card => {
+      card.style.borderColor = "#e5e5e5";
+      card.style.background = "#fff";
+    });
+  });
+</script>
