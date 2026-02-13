@@ -3,79 +3,378 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Тест: Penetration Testing</title>
+  <title>Модуль 4 — Тест</title>
   <style>
-    :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; line-height: 1.35; }
-    body { margin: 0; padding: 18px; background: #fff; color: #111; }
-    h1 { font-size: 18px; margin: 0 0 12px; }
-    .card { border: 1px solid #e5e5e5; border-radius: 10px; padding: 14px; margin: 10px 0; }
-    .q { font-weight: 600; margin-bottom: 10px; }
-    .opt { display: block; padding: 8px 10px; margin: 6px 0; border: 1px solid #eee; border-radius: 8px; cursor: pointer; }
-    .opt:hover { background: #fafafa; }
-    .opt input { margin-right: 8px; }
-    .actions { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
-    button { padding: 10px 12px; border: 1px solid #ddd; background: #f7f7f7; border-radius: 10px; cursor: pointer; }
-    button:hover { background: #f0f0f0; }
-    .result { margin-top: 14px; padding: 12px; border-radius: 10px; border: 1px solid #eee; background: #fcfcfc; }
-    .good { color: #0a7a2f; font-weight: 700; }
-    .bad { color: #b00020; font-weight: 700; }
+    :root{
+      --bg1:#0b1220;
+      --bg2:#0f1b2d;
+      --card:#0f172a;
+      --card2:#0b1220;
+      --text:#e5e7eb;
+      --muted:#9ca3af;
+      --line:rgba(255,255,255,.10);
+      --soft:rgba(255,255,255,.06);
+      --good:#22c55e;
+      --bad:#ef4444;
+      --accent:#60a5fa;
+      --accent2:#a78bfa;
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --r:18px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      color:var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(1200px 800px at 12% 10%, rgba(96,165,250,.16), transparent 60%),
+        radial-gradient(900px 700px at 88% 18%, rgba(167,139,250,.14), transparent 62%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+    }
+
+    .wrap{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 28px 16px 48px;
+    }
+
+    .hero{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:16px;
+      padding: 18px 18px 14px;
+      border:1px solid var(--line);
+      border-radius: var(--r);
+      background: rgba(15,23,42,.55);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+    }
+
+    .titleBlock h1{
+      margin:0;
+      font-size: 28px;
+      letter-spacing:.4px;
+    }
+    .titleBlock p{
+      margin:6px 0 0;
+      color:var(--muted);
+      font-size: 14px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      font-size: 13px;
+      white-space:nowrap;
+    }
+    .dot{
+      width:10px;height:10px;border-radius:999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 0 0 4px rgba(96,165,250,.12);
+    }
+
+    .card{
+      margin-top: 18px;
+      border:1px solid var(--line);
+      border-radius: var(--r);
+      background: rgba(15,23,42,.55);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .cardHeader{
+      padding: 14px 18px;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .progressWrap{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width: 240px;
+      flex: 1;
+      justify-content:flex-end;
+    }
+    .progress{
+      width: 260px;
+      max-width: 60vw;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      overflow:hidden;
+    }
+    .bar{
+      height:100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 999px;
+      transition: width .25s ease;
+    }
+    .pct{
+      font-size: 13px;
+      color: var(--muted);
+      min-width: 54px;
+      text-align:right;
+    }
+
+    .content{ padding: 14px 18px 18px; }
+
+    .qCard{
+      border:1px solid var(--line);
+      background: rgba(11,18,32,.55);
+      border-radius: 16px;
+      padding: 14px;
+      margin: 12px 0;
+    }
+
+    .qHead{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 10px;
+    }
+
+    .qText{
+      font-weight: 650;
+      line-height: 1.3;
+    }
+
+    .qNum{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      font-weight: 700;
+      flex: 0 0 auto;
+    }
+
+    .opt{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      padding: 12px 12px;
+      margin: 8px 0;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      cursor:pointer;
+      transition: transform .06s ease, background .15s ease, border-color .15s ease;
+      user-select:none;
+    }
+    .opt:hover{
+      background: rgba(255,255,255,.05);
+      border-color: rgba(255,255,255,.16);
+      transform: translateY(-1px);
+    }
+
+    .opt input{
+      margin-top: 2px;
+      width: 18px;
+      height: 18px;
+      accent-color: #8ab4ff;
+      flex: 0 0 auto;
+    }
+
+    .opt span{
+      color: var(--text);
+      line-height: 1.25;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      margin-top: 14px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .btns{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    button{
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.05);
+      color: var(--text);
+      padding: 11px 14px;
+      border-radius: 14px;
+      cursor:pointer;
+      font-weight: 650;
+      letter-spacing:.2px;
+      transition: background .15s ease, border-color .15s ease, transform .06s ease;
+    }
+    button:hover{
+      background: rgba(255,255,255,.08);
+      border-color: rgba(255,255,255,.20);
+      transform: translateY(-1px);
+    }
+
+    .primary{
+      border: 1px solid rgba(96,165,250,.45);
+      background: linear-gradient(135deg, rgba(96,165,250,.18), rgba(167,139,250,.16));
+    }
+    .primary:hover{
+      background: linear-gradient(135deg, rgba(96,165,250,.25), rgba(167,139,250,.22));
+    }
+
+    .result{
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(11,18,32,.55);
+      display:none;
+    }
+
+    .result.good{ border-color: rgba(34,197,94,.35); }
+    .result.bad{ border-color: rgba(239,68,68,.35); }
+
+    .resultTitle{
+      font-weight: 800;
+      margin: 0 0 4px;
+      letter-spacing:.2px;
+    }
+    .resultText{
+      margin:0;
+      color: var(--muted);
+    }
+
+    .markMissing{
+      border-color: rgba(239,68,68,.45) !important;
+      background: rgba(239,68,68,.06) !important;
+    }
+
+    @media (max-width: 520px){
+      .titleBlock h1{ font-size: 22px; }
+      .progress{ width: 220px; }
+    }
   </style>
 </head>
+
 <body>
-  <h1>Промежуточные вопросы к модулю <span style="white-space:nowrap;">Penetration Testing</span></h1>
-
-  <form id="quiz">
-    <div class="card" data-q="1">
-      <div class="q">1. Что такое пентест (Penetration testing)?</div>
-      <label class="opt"><input type="radio" name="q1" value="a">Процесс разработки программного обеспечения</label>
-      <label class="opt"><input type="radio" name="q1" value="b">Контролируемая имитация атаки на систему для выявления уязвимостей</label>
-      <label class="opt"><input type="radio" name="q1" value="c">Тестирование скорости сети</label>
-      <label class="opt"><input type="radio" name="q1" value="d">Анализ пользовательского интерфейса</label>
+  <div class="wrap">
+    <div class="hero">
+      <div class="titleBlock">
+        <h1>Модуль 4 — Тест</h1>
+        <p>Промежуточные вопросы к модулю Penetration Testing</p>
+      </div>
+      <div class="badge"><span class="dot"></span><span id="status">Готово к прохождению</span></div>
     </div>
 
-    <div class="card" data-q="2">
-      <div class="q">2. Какой этап пентеста включает поиск открытых портов и версий ПО?</div>
-      <label class="opt"><input type="radio" name="q2" value="a">Разведка</label>
-      <label class="opt"><input type="radio" name="q2" value="b">Эксплуатация</label>
-      <label class="opt"><input type="radio" name="q2" value="c">Сканирование</label>
-      <label class="opt"><input type="radio" name="q2" value="d">Постэксплуатация</label>
-    </div>
+    <div class="card">
+      <div class="cardHeader">
+        <div style="color:var(--muted); font-size:13px;">Выбери один вариант ответа в каждом вопросе</div>
+        <div class="progressWrap" aria-label="Прогресс заполнения">
+          <div class="progress"><div class="bar" id="bar"></div></div>
+          <div class="pct" id="pct">0/5</div>
+        </div>
+      </div>
 
-    <div class="card" data-q="3">
-      <div class="q">3. Какой инструмент используется для сканирования сетей и аудита безопасности?</div>
-      <label class="opt"><input type="radio" name="q3" value="a">BurpSuite</label>
-      <label class="opt"><input type="radio" name="q3" value="b">Nmap</label>
-      <label class="opt"><input type="radio" name="q3" value="c">Dirsearch</label>
-      <label class="opt"><input type="radio" name="q3" value="d">ExploitDB</label>
-    </div>
+      <div class="content">
+        <form id="quiz" autocomplete="off">
+          <div class="qCard" data-q="1">
+            <div class="qHead">
+              <div class="qText">Что такое пентест (Penetration testing)?</div>
+              <div class="qNum">1</div>
+            </div>
+            <label class="opt"><input type="radio" name="q1" value="a"><span>Процесс разработки программного обеспечения</span></label>
+            <label class="opt"><input type="radio" name="q1" value="b"><span>Контролируемая имитация атаки на систему для выявления уязвимостей</span></label>
+            <label class="opt"><input type="radio" name="q1" value="c"><span>Тестирование скорости сети</span></label>
+            <label class="opt"><input type="radio" name="q1" value="d"><span>Анализ пользовательского интерфейса</span></label>
+          </div>
 
-    <div class="card" data-q="4">
-      <div class="q">4. Какая основная функция BurpSuite?</div>
-      <label class="opt"><input type="radio" name="q4" value="a">Сканирование портов</label>
-      <label class="opt"><input type="radio" name="q4" value="b">Перехват и анализ веб-трафика</label>
-      <label class="opt"><input type="radio" name="q4" value="c">Поиск открытых сервисов</label>
-      <label class="opt"><input type="radio" name="q4" value="d">Управление правами доступа</label>
-    </div>
+          <div class="qCard" data-q="2">
+            <div class="qHead">
+              <div class="qText">Какой этап пентеста включает поиск открытых портов и версий ПО?</div>
+              <div class="qNum">2</div>
+            </div>
+            <label class="opt"><input type="radio" name="q2" value="a"><span>Разведка</span></label>
+            <label class="opt"><input type="radio" name="q2" value="b"><span>Эксплуатация</span></label>
+            <label class="opt"><input type="radio" name="q2" value="c"><span>Сканирование</span></label>
+            <label class="opt"><input type="radio" name="q2" value="d"><span>Постэксплуатация</span></label>
+          </div>
 
-    <div class="card" data-q="5">
-      <div class="q">5. Какой инструмент не относится к фаззингу директорий и файлов?</div>
-      <label class="opt"><input type="radio" name="q5" value="a">Gobuster</label>
-      <label class="opt"><input type="radio" name="q5" value="b">ffuf</label>
-      <label class="opt"><input type="radio" name="q5" value="c">Dirsearch</label>
-      <label class="opt"><input type="radio" name="q5" value="d">Nmap</label>
-    </div>
+          <div class="qCard" data-q="3">
+            <div class="qHead">
+              <div class="qText">Какой инструмент используется для сканирования сетей и аудита безопасности?</div>
+              <div class="qNum">3</div>
+            </div>
+            <label class="opt"><input type="radio" name="q3" value="a"><span>BurpSuite</span></label>
+            <label class="opt"><input type="radio" name="q3" value="b"><span>Nmap</span></label>
+            <label class="opt"><input type="radio" name="q3" value="c"><span>Dirsearch</span></label>
+            <label class="opt"><input type="radio" name="q3" value="d"><span>ExploitDB</span></label>
+          </div>
 
-    <div class="actions">
-      <button type="button" id="check">Проверить</button>
-      <button type="reset" id="reset">Сбросить</button>
-    </div>
+          <div class="qCard" data-q="4">
+            <div class="qHead">
+              <div class="qText">Какая основная функция BurpSuite?</div>
+              <div class="qNum">4</div>
+            </div>
+            <label class="opt"><input type="radio" name="q4" value="a"><span>Сканирование портов</span></label>
+            <label class="opt"><input type="radio" name="q4" value="b"><span>Перехват и анализ веб-трафика</span></label>
+            <label class="opt"><input type="radio" name="q4" value="c"><span>Поиск открытых сервисов</span></label>
+            <label class="opt"><input type="radio" name="q4" value="d"><span>Управление правами доступа</span></label>
+          </div>
 
-    <div class="result" id="result" aria-live="polite" style="display:none;"></div>
-  </form>
+          <div class="qCard" data-q="5">
+            <div class="qHead">
+              <div class="qText">Какой инструмент не относится к фаззингу директорий и файлов?</div>
+              <div class="qNum">5</div>
+            </div>
+            <label class="opt"><input type="radio" name="q5" value="a"><span>Gobuster</span></label>
+            <label class="opt"><input type="radio" name="q5" value="b"><span>ffuf</span></label>
+            <label class="opt"><input type="radio" name="q5" value="c"><span>Dirsearch</span></label>
+            <label class="opt"><input type="radio" name="q5" value="d"><span>Nmap</span></label>
+          </div>
+
+          <div class="actions">
+            <div class="btns">
+              <button type="button" class="primary" id="check">Проверить</button>
+              <button type="reset" id="reset">Сбросить</button>
+            </div>
+            <div style="color:var(--muted); font-size:13px;" id="hint"></div>
+          </div>
+
+          <div class="result" id="result" aria-live="polite"></div>
+        </form>
+      </div>
+    </div>
+  </div>
 
   <script>
     const SALT = "soc-quiz-v1::diasik17";
     const EXPECTED_HASH = "5113fb1a634ce3285591f9d898f88ef243a24def68748cf46219f5553982597b";
+
+    const bar = document.getElementById("bar");
+    const pct = document.getElementById("pct");
+    const status = document.getElementById("status");
+    const hint = document.getElementById("hint");
+    const resultEl = document.getElementById("result");
 
     function selected(name) {
       const el = document.querySelector("input[name='" + name + "']:checked");
@@ -88,18 +387,41 @@
       return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
     }
 
-    function resetCardStyles() {
-      document.querySelectorAll(".card").forEach(card => {
-        card.style.borderColor = "#e5e5e5";
-        card.style.background = "#fff";
-      });
+    function setResult(type, title, text) {
+      resultEl.className = "result " + type;
+      resultEl.style.display = "block";
+      resultEl.innerHTML = `<div class="resultTitle">${title}</div><p class="resultText">${text}</p>`;
     }
 
-    document.getElementById("check").addEventListener("click", async () => {
-      const resultEl = document.getElementById("result");
+    function clearResult() {
       resultEl.style.display = "none";
       resultEl.innerHTML = "";
-      resetCardStyles();
+      resultEl.className = "result";
+    }
+
+    function updateProgress() {
+      const answers = ["q1","q2","q3","q4","q5"].map(q => selected(q)).filter(Boolean).length;
+      const total = 5;
+      const percent = Math.round((answers / total) * 100);
+      bar.style.width = percent + "%";
+      pct.textContent = `${answers}/${total}`;
+      status.textContent = (answers === total) ? "Можно проверить" : "Заполни все ответы";
+      hint.textContent = (answers === total) ? "Нажми «Проверить»" : "";
+    }
+
+    function resetMissingMarks() {
+      document.querySelectorAll(".qCard").forEach(card => card.classList.remove("markMissing"));
+    }
+
+    document.getElementById("quiz").addEventListener("change", () => {
+      clearResult();
+      resetMissingMarks();
+      updateProgress();
+    });
+
+    document.getElementById("check").addEventListener("click", async () => {
+      clearResult();
+      resetMissingMarks();
 
       const payload = {
         q1: selected("q1"),
@@ -110,19 +432,13 @@
       };
 
       const unanswered = Object.keys(payload).filter(q => !payload[q]);
-
       if (unanswered.length > 0) {
         unanswered.forEach((q) => {
           const n = q.replace("q", "");
-          const card = document.querySelector(".card[data-q='" + n + "']");
-          card.style.borderColor = "#f2c0c0";
-          card.style.background = "#fffafa";
+          const card = document.querySelector(".qCard[data-q='" + n + "']");
+          if (card) card.classList.add("markMissing");
         });
-
-        resultEl.style.display = "block";
-        resultEl.innerHTML =
-          "<div><strong>Ошибка:</strong> выбери все ответы.</div>" +
-          "<div style='margin-top:6px;'>Не отвечено: " + unanswered.map(q => q.toUpperCase()).join(", ") + "</div>";
+        setResult("bad", "Выбери все ответы", "Нужно ответить на каждый вопрос, затем нажать «Проверить».");
         return;
       }
 
@@ -131,29 +447,22 @@
 
       const okAll = (hash === EXPECTED_HASH);
 
-      document.querySelectorAll(".card").forEach(card => {
-        card.style.borderColor = okAll ? "#bfe7c9" : "#f2c0c0";
-        card.style.background = okAll ? "#fbfffc" : "#fffafa";
-      });
-
-      resultEl.style.display = "block";
-      resultEl.innerHTML =
-        "<div><strong>Результат:</strong> " +
-        (okAll ? "5 из 5 (100%)" : "есть ошибки") +
-        "</div>" +
-        "<div style='margin-top:8px;'>" +
-          (okAll
-            ? "<span class='good'>Отлично! Все ответы верные.</span>"
-            : "<span class='bad'>Есть ошибки — проверь ответы и попробуй снова.</span>") +
-        "</div>";
+      if (okAll) {
+        setResult("good", "Отлично!", "Все ответы верные. Результат: 5/5 (100%).");
+      } else {
+        setResult("bad", "Есть ошибки", "Проверь ответы и попробуй ещё раз.");
+      }
     });
 
     document.getElementById("reset").addEventListener("click", () => {
-      const resultEl = document.getElementById("result");
-      resultEl.style.display = "none";
-      resultEl.innerHTML = "";
-      resetCardStyles();
+      clearResult();
+      resetMissingMarks();
+      updateProgress();
+      status.textContent = "Готово к прохождению";
+      hint.textContent = "";
     });
+
+    updateProgress();
   </script>
 </body>
 </html>
