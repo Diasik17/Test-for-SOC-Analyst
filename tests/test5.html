@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Модуль 5 — Тест (Основы Splunk)</title>
+  <style>
+    :root{
+      --bg1:#0b1220; --bg2:#0f1b2d;
+      --text:#e5e7eb; --muted:#9ca3af;
+      --line:rgba(255,255,255,.10);
+      --good:#22c55e; --bad:#ef4444;
+      --accent:#60a5fa; --accent2:#a78bfa;
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --r:18px;
+    }
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0; color:var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(1200px 800px at 12% 10%, rgba(96,165,250,.16), transparent 60%),
+        radial-gradient(900px 700px at 88% 18%, rgba(167,139,250,.14), transparent 62%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+    }
+    .wrap{ max-width: 980px; margin: 0 auto; padding: 28px 16px 48px; }
+    .hero{
+      display:flex; align-items:flex-end; justify-content:space-between; gap:16px;
+      padding: 18px 18px 14px;
+      border:1px solid var(--line); border-radius: var(--r);
+      background: rgba(15,23,42,.55); backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+    }
+    .titleBlock h1{ margin:0; font-size: 28px; letter-spacing:.4px; }
+    .titleBlock p{ margin:6px 0 0; color:var(--muted); font-size: 14px; }
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      font-size: 13px; white-space:nowrap;
+    }
+    .dot{
+      width:10px;height:10px;border-radius:999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 0 0 4px rgba(96,165,250,.12);
+    }
+    .card{
+      margin-top: 18px;
+      border:1px solid var(--line); border-radius: var(--r);
+      background: rgba(15,23,42,.55); backdrop-filter: blur(10px);
+      box-shadow: var(--shadow); overflow:hidden;
+    }
+    .cardHeader{
+      padding: 14px 18px; border-bottom:1px solid var(--line);
+      display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    }
+    .progressWrap{ display:flex; align-items:center; gap:10px; min-width: 240px; flex: 1; justify-content:flex-end; }
+    .progress{
+      width: 260px; max-width: 60vw; height: 10px;
+      border-radius: 999px; background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08); overflow:hidden;
+    }
+    .bar{ height:100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 999px; transition: width .25s ease; }
+    .pct{ font-size: 13px; color: var(--muted); min-width: 64px; text-align:right; }
+    .content{ padding: 14px 18px 18px; }
+    .qCard{
+      border:1px solid var(--line);
+      background: rgba(11,18,32,.55);
+      border-radius: 16px;
+      padding: 14px;
+      margin: 12px 0;
+    }
+    .qHead{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom: 10px; }
+    .qText{ font-weight: 650; line-height: 1.3; }
+    .qNum{
+      display:inline-flex; align-items:center; justify-content:center;
+      min-width: 34px; height: 34px;
+      border-radius: 12px; border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      font-weight: 800; flex: 0 0 auto;
+    }
+    .opt{
+      display:flex; gap:10px; align-items:flex-start;
+      padding: 12px 12px; margin: 8px 0;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      cursor:pointer;
+      transition: transform .06s ease, background .15s ease, border-color .15s ease;
+      user-select:none;
+    }
+    .opt:hover{ background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.16); transform: translateY(-1px); }
+    .opt input{ margin-top: 2px; width: 18px; height: 18px; accent-color: #8ab4ff; flex: 0 0 auto; }
+    .opt span{ color: var(--text); line-height: 1.25; }
+    .actions{ display:flex; gap:10px; margin-top: 14px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
+    .btns{ display:flex; gap:10px; flex-wrap:wrap; }
+    button{
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.05);
+      color: var(--text);
+      padding: 11px 14px;
+      border-radius: 14px;
+      cursor:pointer;
+      font-weight: 700;
+      letter-spacing:.2px;
+      transition: background .15s ease, border-color .15s ease, transform .06s ease;
+    }
+    button:hover{ background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.20); transform: translateY(-1px); }
+    .primary{ border: 1px solid rgba(96,165,250,.45); background: linear-gradient(135deg, rgba(96,165,250,.18), rgba(167,139,250,.16)); }
+    .primary:hover{ background: linear-gradient(135deg, rgba(96,165,250,.25), rgba(167,139,250,.22)); }
+    .result{
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(11,18,32,.55);
+      display:none;
+    }
+    .result.good{ border-color: rgba(34,197,94,.35); }
+    .result.bad{ border-color: rgba(239,68,68,.35); }
+    .resultTitle{ font-weight: 900; margin: 0 0 4px; letter-spacing:.2px; }
+    .resultText{ margin:0; color: var(--muted); }
+    .markMissing{ border-color: rgba(239,68,68,.45) !important; background: rgba(239,68,68,.06) !important; }
+    @media (max-width: 520px){ .titleBlock h1{ font-size: 22px; } .progress{ width: 220px; } }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div class="titleBlock">
+        <h1>Модуль 5 — Тест</h1>
+        <p>Курс «Основы Splunk»</p>
+      </div>
+      <div class="badge"><span class="dot"></span><span id="status">Готово к прохождению</span></div>
+    </div>
+
+    <div class="card">
+      <div class="cardHeader">
+        <div style="color:var(--muted); font-size:13px;">Выбери один вариант ответа в каждом вопросе</div>
+        <div class="progressWrap">
+          <div class="progress"><div class="bar" id="bar"></div></div>
+          <div class="pct" id="pct">0/10</div>
+        </div>
+      </div>
+
+      <div class="content">
+        <form id="quiz" autocomplete="off">
+          <div class="qCard" data-q="1">
+            <div class="qHead"><div class="qText">Какие три основных компонента составляют базовую архитектуру Splunk?</div><div class="qNum">1</div></div>
+            <label class="opt"><input type="radio" name="q1" value="a"><span>Database, Web Server, Client</span></label>
+            <label class="opt"><input type="radio" name="q1" value="b"><span>Forwarder, Indexer, Search Head</span></label>
+            <label class="opt"><input type="radio" name="q1" value="c"><span>Collector, Processor, Viewer</span></label>
+            <label class="opt"><input type="radio" name="q1" value="d"><span>Input, Storage, Output</span></label>
+          </div>
+
+          <div class="qCard" data-q="2">
+            <div class="qHead"><div class="qText">Как называется специальный язык запросов, используемый в Splunk для поиска и анализа данных?</div><div class="qNum">2</div></div>
+            <label class="opt"><input type="radio" name="q2" value="a"><span>SQL (Structured Query Language)</span></label>
+            <label class="opt"><input type="radio" name="q2" value="b"><span>PQL (Pipeline Query Language)</span></label>
+            <label class="opt"><input type="radio" name="q2" value="c"><span>SPL (Search Processing Language)</span></label>
+            <label class="opt"><input type="radio" name="q2" value="d"><span>KQL (Kusto Query Language)</span></label>
+          </div>
+
+          <div class="qCard" data-q="3">
+            <div class="qHead"><div class="qText">Какой компонент отвечает за сбор данных с конечных устройств и их передачу для дальнейшей обработки?</div><div class="qNum">3</div></div>
+            <label class="opt"><input type="radio" name="q3" value="a"><span>Search Head</span></label>
+            <label class="opt"><input type="radio" name="q3" value="b"><span>Indexer</span></label>
+            <label class="opt"><input type="radio" name="q3" value="c"><span>Forwarder (Universal или Heavy)</span></label>
+            <label class="opt"><input type="radio" name="q3" value="d"><span>Deployment Server</span></label>
+          </div>
+
+          <div class="qCard" data-q="4">
+            <div class="qHead"><div class="qText">Что в терминологии Splunk означает поле «sourcetype»?</div><div class="qNum">4</div></div>
+            <label class="opt"><input type="radio" name="q4" value="a"><span>Имя сервера, с которого пришли данные</span></label>
+            <label class="opt"><input type="radio" name="q4" value="b"><span>Формат данных (например, linux_secure, access_combined или cisco:asa)</span></label>
+            <label class="opt"><input type="radio" name="q4" value="c"><span>Путь к файлу логов</span></label>
+            <label class="opt"><input type="radio" name="q4" value="d"><span>Время поступления данных в систему</span></label>
+          </div>
+
+          <div class="qCard" data-q="5">
+            <div class="qHead"><div class="qText">Для чего используется символ «пайп» (|) в строке поиска Splunk?</div><div class="qNum">5</div></div>
+            <label class="opt"><input type="radio" name="q5" value="a"><span>Для логического отрицания (NOT)</span></label>
+            <label class="opt"><input type="radio" name="q5" value="b"><span>Для объединения двух разных поисковых запросов</span></label>
+            <label class="opt"><input type="radio" name="q5" value="c"><span>Для передачи результатов одной команды на вход следующей</span></label>
+            <label class="opt"><input type="radio" name="q5" value="d"><span>Для обозначения конца запроса</span></label>
+          </div>
+
+          <div class="qCard" data-q="6">
+            <div class="qHead"><div class="qText">Какая команда SPL используется для создания статистических отчетов (например, подсчета количества событий)?</div><div class="qNum">6</div></div>
+            <label class="opt"><input type="radio" name="q6" value="a"><span>table</span></label>
+            <label class="opt"><input type="radio" name="q6" value="b"><span>stats</span></label>
+            <label class="opt"><input type="radio" name="q6" value="c"><span>search</span></label>
+            <label class="opt"><input type="radio" name="q6" value="d"><span>fields</span></label>
+          </div>
+
+          <div class="qCard" data-q="7">
+            <div class="qHead"><div class="qText">В чем разница между полями «Selected Fields» и «Interesting Fields» в боковой панели поиска?</div><div class="qNum">7</div></div>
+            <label class="opt"><input type="radio" name="q7" value="a"><span>Selected Fields видны только администраторам</span></label>
+            <label class="opt"><input type="radio" name="q7" value="b"><span>Selected Fields — это те, которые вы выбрали для постоянного отображения под каждым событием</span></label>
+            <label class="opt"><input type="radio" name="q7" value="c"><span>Interesting Fields — это поля, которые присутствуют во всех 100% событий</span></label>
+            <label class="opt"><input type="radio" name="q7" value="d"><span>Разницы нет, это просто разные названия</span></label>
+          </div>
+
+          <div class="qCard" data-q="8">
+            <div class="qHead"><div class="qText">Какое поле в Splunk всегда содержит время события, приведенное к формату UNIX?</div><div class="qNum">8</div></div>
+            <label class="opt"><input type="radio" name="q8" value="a"><span>time</span></label>
+            <label class="opt"><input type="radio" name="q8" value="b"><span>event_time</span></label>
+            <label class="opt"><input type="radio" name="q8" value="c"><span>_time</span></label>
+            <label class="opt"><input type="radio" name="q8" value="d"><span>timestamp</span></label>
+          </div>
+
+          <div class="qCard" data-q="9">
+            <div class="qHead"><div class="qText">Как ограничить временной диапазон поиска в интерфейсе Splunk?</div><div class="qNum">9</div></div>
+            <label class="opt"><input type="radio" name="q9" value="a"><span>Написав дату в строке поиска вручную</span></label>
+            <label class="opt"><input type="radio" name="q9" value="b"><span>С помощью выпадающего меню «Time Range Picker» справа от строки поиска</span></label>
+            <label class="opt"><input type="radio" name="q9" value="c"><span>Это невозможно сделать после запуска поиска</span></label>
+            <label class="opt"><input type="radio" name="q9" value="d"><span>Только через настройки профиля пользователя</span></label>
+          </div>
+
+          <div class="qCard" data-q="10">
+            <div class="qHead"><div class="qText">Что происходит с данными на этапе индексации (Indexing)?</div><div class="qNum">10</div></div>
+            <label class="opt"><input type="radio" name="q10" value="a"><span>Данные удаляются после прочтения</span></label>
+            <label class="opt"><input type="radio" name="q10" value="b"><span>Данные сжимаются и записываются на диск в виде сегментов (buckets)</span></label>
+            <label class="opt"><input type="radio" name="q10" value="c"><span>Данные визуализируются в виде графиков</span></label>
+            <label class="opt"><input type="radio" name="q10" value="d"><span>Данные отправляются обратно на источник для проверки</span></label>
+          </div>
+
+          <div class="actions">
+            <div class="btns">
+              <button type="button" class="primary" id="check">Проверить</button>
+              <button type="res
