@@ -19,7 +19,6 @@
     .result { margin-top: 14px; padding: 12px; border-radius: 10px; border: 1px solid #eee; background: #fcfcfc; }
     .good { color: #0a7a2f; font-weight: 700; }
     .bad { color: #b00020; font-weight: 700; }
-    .muted { color:#666; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -72,12 +71,11 @@
     </div>
 
     <div class="result" id="result" aria-live="polite" style="display:none;"></div>
-    <div class="muted" style="margin-top:8px;"></div>
   </form>
 
   <script>
     const SALT = "soc-quiz-v1::diasik17";
-    const EXPECTED_HASH = "REPLACE_WITH_HASH";
+    const EXPECTED_HASH = "5113fb1a634ce3285591f9d898f88ef243a24def68748cf46219f5553982597b";
 
     function selected(name) {
       const el = document.querySelector("input[name='" + name + "']:checked");
@@ -90,7 +88,19 @@
       return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
     }
 
+    function resetCardStyles() {
+      document.querySelectorAll(".card").forEach(card => {
+        card.style.borderColor = "#e5e5e5";
+        card.style.background = "#fff";
+      });
+    }
+
     document.getElementById("check").addEventListener("click", async () => {
+      const resultEl = document.getElementById("result");
+      resultEl.style.display = "none";
+      resultEl.innerHTML = "";
+      resetCardStyles();
+
       const payload = {
         q1: selected("q1"),
         q2: selected("q2"),
@@ -99,19 +109,24 @@
         q5: selected("q5"),
       };
 
-      Object.keys(payload).forEach((q) => {
-        const n = q.replace("q", "");
-        const card = document.querySelector(".card[data-q='" + n + "']");
-        if (!payload[q]) {
+      const unanswered = Object.keys(payload).filter(q => !payload[q]);
+
+      if (unanswered.length > 0) {
+        unanswered.forEach((q) => {
+          const n = q.replace("q", "");
+          const card = document.querySelector(".card[data-q='" + n + "']");
           card.style.borderColor = "#f2c0c0";
           card.style.background = "#fffafa";
-        }
-      });
+        });
 
-      if (Object.values(payload).some(v => !v)) return;
+        resultEl.style.display = "block";
+        resultEl.innerHTML =
+          "<div><strong>Ошибка:</strong> выбери все ответы.</div>" +
+          "<div style='margin-top:6px;'>Не отвечено: " + unanswered.map(q => q.toUpperCase()).join(", ") + "</div>";
+        return;
+      }
 
-      const canonical =
-        `q1=${payload.q1}|q2=${payload.q2}|q3=${payload.q3}|q4=${payload.q4}|q5=${payload.q5}`;
+      const canonical = `q1=${payload.q1}|q2=${payload.q2}|q3=${payload.q3}|q4=${payload.q4}|q5=${payload.q5}`;
       const hash = await sha256Hex(SALT + "::" + canonical);
 
       const okAll = (hash === EXPECTED_HASH);
@@ -121,7 +136,6 @@
         card.style.background = okAll ? "#fbfffc" : "#fffafa";
       });
 
-      const resultEl = document.getElementById("result");
       resultEl.style.display = "block";
       resultEl.innerHTML =
         "<div><strong>Результат:</strong> " +
@@ -137,10 +151,8 @@
     document.getElementById("reset").addEventListener("click", () => {
       const resultEl = document.getElementById("result");
       resultEl.style.display = "none";
-      document.querySelectorAll(".card").forEach(card => {
-        card.style.borderColor = "#e5e5e5";
-        card.style.background = "#fff";
-      });
+      resultEl.innerHTML = "";
+      resetCardStyles();
     });
   </script>
 </body>
