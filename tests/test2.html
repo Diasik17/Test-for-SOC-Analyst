@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Модуль 2 — Тест (Incident Response и MISP)</title>
+  <style>
+    :root{
+      --bg1:#0b1220; --bg2:#0f1b2d;
+      --text:#e5e7eb; --muted:#9ca3af;
+      --line:rgba(255,255,255,.10);
+      --good:#22c55e; --bad:#ef4444;
+      --accent:#60a5fa; --accent2:#a78bfa;
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --r:18px;
+    }
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0; color:var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(1200px 800px at 12% 10%, rgba(96,165,250,.16), transparent 60%),
+        radial-gradient(900px 700px at 88% 18%, rgba(167,139,250,.14), transparent 62%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+    }
+    .wrap{ max-width: 980px; margin: 0 auto; padding: 28px 16px 48px; }
+    .hero{
+      display:flex; align-items:flex-end; justify-content:space-between; gap:16px;
+      padding: 18px 18px 14px;
+      border:1px solid var(--line); border-radius: var(--r);
+      background: rgba(15,23,42,.55); backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+    }
+    .titleBlock h1{ margin:0; font-size: 28px; letter-spacing:.4px; }
+    .titleBlock p{ margin:6px 0 0; color:var(--muted); font-size: 14px; }
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      font-size: 13px; white-space:nowrap;
+    }
+    .dot{
+      width:10px;height:10px;border-radius:999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 0 0 4px rgba(96,165,250,.12);
+    }
+    .card{
+      margin-top: 18px;
+      border:1px solid var(--line); border-radius: var(--r);
+      background: rgba(15,23,42,.55); backdrop-filter: blur(10px);
+      box-shadow: var(--shadow); overflow:hidden;
+    }
+    .cardHeader{
+      padding: 14px 18px; border-bottom:1px solid var(--line);
+      display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+    }
+    .progressWrap{ display:flex; align-items:center; gap:10px; min-width: 240px; flex: 1; justify-content:flex-end; }
+    .progress{
+      width: 260px; max-width: 60vw; height: 10px;
+      border-radius: 999px; background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08); overflow:hidden;
+    }
+    .bar{ height:100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 999px; transition: width .25s ease; }
+    .pct{ font-size: 13px; color: var(--muted); min-width: 64px; text-align:right; }
+    .content{ padding: 14px 18px 18px; }
+    .qCard{
+      border:1px solid var(--line);
+      background: rgba(11,18,32,.55);
+      border-radius: 16px;
+      padding: 14px;
+      margin: 12px 0;
+    }
+    .qHead{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom: 10px; }
+    .qText{ font-weight: 650; line-height: 1.3; white-space:pre-wrap; }
+    .qNum{
+      display:inline-flex; align-items:center; justify-content:center;
+      min-width: 34px; height: 34px;
+      border-radius: 12px; border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      font-weight: 1000; flex: 0 0 auto;
+    }
+    .opt{
+      display:flex; gap:10px; align-items:flex-start;
+      padding: 12px 12px; margin: 8px 0;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      cursor:pointer;
+      transition: transform .06s ease, background .15s ease, border-color .15s ease;
+      user-select:none;
+    }
+    .opt:hover{ background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.16); transform: translateY(-1px); }
+    .opt input{ margin-top: 2px; width: 18px; height: 18px; accent-color: #8ab4ff; flex: 0 0 auto; }
+    .opt span{ color: var(--text); line-height: 1.25; white-space:pre-wrap; }
+    .actions{ display:flex; gap:10px; margin-top: 14px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
+    .btns{ display:flex; gap:10px; flex-wrap:wrap; }
+    button{
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.05);
+      color: var(--text);
+      padding: 11px 14px;
+      border-radius: 14px;
+      cursor:pointer;
+      font-weight: 900;
+      letter-spacing:.2px;
+      transition: background .15s ease, border-color .15s ease, transform .06s ease;
+    }
+    button:hover{ background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.20); transform: translateY(-1px); }
+    .primary{ border: 1px solid rgba(96,165,250,.45); background: linear-gradient(135deg, rgba(96,165,250,.18), rgba(167,139,250,.16)); }
+    .primary:hover{ background: linear-gradient(135deg, rgba(96,165,250,.25), rgba(167,139,250,.22)); }
+    .result{
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(11,18,32,.55);
+      display:none;
+    }
+    .result.good{ border-color: rgba(34,197,94,.35); }
+    .result.bad{ border-color: rgba(239,68,68,.35); }
+    .resultTitle{ font-weight: 1000; margin: 0 0 4px; letter-spacing:.2px; }
+    .resultText{ margin:0; color: var(--muted); }
+    .markMissing{ border-color: rgba(239,68,68,.45) !important; background: rgba(239,68,68,.06) !important; }
+    @media (max-width: 520px){ .titleBlock h1{ font-size: 22px; } .progress{ width: 220px; } }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div class="titleBlock">
+        <h1>Модуль 2 — Тест</h1>
+        <p>Incident Response и платформа MISP</p>
+      </div>
+      <div class="badge"><span class="dot"></span><span id="status">Готово к прохождению</span></div>
+    </div>
+
+    <div class="card">
+      <div class="cardHeader">
+        <div style="color:var(--muted); font-size:13px;">Выбери один вариант ответа в каждом вопросе</div>
+        <div class="progressWrap">
+          <div class="progress"><div class="bar" id="bar"></div></div>
+          <div class="pct" id="pct">0/7</div>
+        </div>
+      </div>
+
+      <div class="content">
+        <form id="quiz" autocomplete="off">
+          <div class="qCard" data-q="1">
+            <div class="qHead"><div class="qText">Какой этап жизненного цикла инцидента по модели SANS отвечает за полное устранение первопричины (например, удаление вредоносного ПО или закрытие уязвимости)?</div><div class="qNum">1</div></div>
+            <label class="opt"><input type="radio" name="q1" value="a"><span>Сдерживание (Containment)</span></label>
+            <label class="opt"><input type="radio" name="q1" value="b"><span>Искоренение (Eradication)</span></label>
+            <label class="opt"><input type="radio" name="q1" value="c"><span>Восстановление (Recovery)</span></label>
+            <label class="opt"><input type="radio" name="q1" value="d"><span>Идентификация (Identification)</span></label>
+          </div>
+
+          <div class="qCard" data-q="2">
+            <div class="qHead"><div class="qText">Метрика MTTD (Mean Time to Detect) измеряет время между какими двумя событиями?</div><div class="qNum">2</div></div>
+            <label class="opt"><input type="radio" name="q2" value="a"><span>Между обнаружением и началом сдерживания</span></label>
+            <label class="opt"><input type="radio" name="q2" value="b"><span>Между началом атаки и её полным устранением</span></label>
+            <label class="opt"><input type="radio" name="q2" value="c"><span>Между фактическим началом атаки и моментом её обнаружения системами безопасности</span></label>
+            <label class="opt"><input type="radio" name="q2" value="d"><span>Между обнаружением и созданием отчета об инциденте</span></label>
+          </div>
+
+          <div class="qCard" data-q="3">
+            <div class="qHead"><div class="qText">В платформе MISP для связи технических индикаторов (IP, хеши) с высокоуровневым контекстом (названиями группировок, техниками MITRE ATT&CK) используются:</div><div class="qNum">3</div></div>
+            <label class="opt"><input type="radio" name="q3" value="a"><span>Атрибуты (Attributes)</span></label>
+            <label class="opt"><input type="radio" name="q3" value="b"><span>Таксономии (Taxonomies)</span></label>
+            <label class="opt"><input type="radio" name="q3" value="c"><span>Галактики (Galaxies)</span></label>
+            <label class="opt"><input type="radio" name="q3" value="d"><span>Списки предупреждений (Warning Lists)</span></label>
+          </div>
+
+          <div class="qCard" data-q="4">
+            <div class="qHead"><div class="qText">Какое из следующих утверждений верно описывает «Ложноотрицательное событие» (False Negative)?</div><div class="qNum">4</div></div>
+            <label class="opt"><input type="radio" name="q4" value="a"><span>Система безопасности заблокировала легитимного пользователя</span></label>
+            <label class="opt"><input type="radio" name="q4" value="b"><span>Реальная атака произошла, но не была обнаружена системами мониторинга</span></label>
+            <label class="opt"><input type="radio" name="q4" value="c"><span>Система сгенерировала оповещение на нормальную активность</span></label>
+            <label class="opt"><input type="radio" name="q4" value="d"><span>Атака была обнаружена, но аналитик решил её проигнорировать</span></label>
+          </div>
+
+          <div class="qCard" data-q="5">
+            <div class="qHead"><div class="qText">Согласно обновлению NIST SP 800-61 Revision 3 (2025), функциями активного реагирования на инцидент (Incident Response) являются:</div><div class="qNum">5</div></div>
+            <label class="opt"><input type="radio" name="q5" value="a"><span>Identify, Protect, Detect</span></label>
+            <label class="opt"><input type="radio" name="q5" value="b"><span>Govern, Identify, Respond</span></label>
+            <label class="opt"><input type="radio" name="q5" value="c"><span>Preparation, Detection, Analysis</span></label>
+            <label class="opt"><input type="radio" name="q5" value="d"><span>Detect, Respond, Recover</span></label>
+          </div>
+
+          <div class="qCard" data-q="6">
+            <div class="qHead"><div class="qText">Если в таксономии MISP событию присвоен тэг TLP:RED, это означает, что информация:</div><div class="qNum">6</div></div>
+            <label class="opt"><input type="radio" name="q6" value="a"><span>Может быть опубликована в СМИ</span></label>
+            <label class="opt"><input type="radio" name="q6" value="b"><span>Доступна для всех участников сообщества MISP</span></label>
+            <label class="opt"><input type="radio" name="q6" value="c"><span>Ограничена только узким кругом лиц (внутри организации или группы) из-за высокой чувствительности</span></label>
+            <label class="opt"><input type="radio" name="q6" value="d"><span>Является ложным срабатыванием</span></label>
+          </div>
+
+          <div class="qCard" data-q="7">
+            <div class="qHead"><div class="qText">Какая модель описывает цели злоумышленника как «Раскрытие (Disclosure), Искажение (Alteration) и Отказ (Denial)»?</div><div class="qNum">7</div></div>
+            <label class="opt"><input type="radio" name="q7" value="a"><span>Триада DAD</span></label>
+            <label class="opt"><input type="radio" name="q7" value="b"><span>Триада CIA</span></label>
+            <label class="opt"><input type="radio" name="q7" value="c"><span>Матрица MITRE ATT&CK</span></label>
+            <label class="opt"><input type="radio" name="q7" value="d"><span>Модель Kill Chain</span></label>
+          </div>
+
+          <div class="actions">
+            <div class="btns">
+              <button type="button" class="primary" id="check">Проверить</button>
+              <button type="reset" id="reset">Сбросить</button>
+            </div>
+            <div style="color:var(--muted); font-size:13px;" id="hint"></div>
+          </div>
+
+          <div class="result" id="result" aria-live="polite"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SALT = "soc-quiz-v1::diasik17::ir-misp2";
+    const EXPECTED_HASH = "567eb4d1326f3c2a6a94b6a00077237e8350463bc4730f629be7dbae8f8a6c65";
+
+    const bar = document.getElementById("bar");
+    const pct = document.getElementById("pct");
+    const status = document.getElementById("status");
+    const hint = document.getElementById("hint");
+    const resultEl = document.getElementById("result");
+
+    function selected(name) {
+      const el = document.querySelector("input[name='" + name + "']:checked");
+      return el ? el.value : "";
+    }
+
+    async function sha256Hex(str) {
+      const data = new TextEncoder().encode(str);
+      const digest = await crypto.subtle.digest("SHA-256", data);
+      return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    function setResult(type, title, text) {
+      resultEl.className = "result " + type;
+      resultEl.style.display = "block";
+      resultEl.innerHTML = `<div class="resultTitle">${title}</div><p class="resultText">${text}</p>`;
+    }
+
+    function clearResult() {
+      resultEl.style.display = "none";
+      resultEl.innerHTML = "";
+      resultEl.className = "result";
+    }
+
+    function updateProgress() {
+      const total = 7;
+      const answers = Array.from({length: total}, (_, i) => "q" + (i+1))
+        .map(q => selected(q))
+        .filter(Boolean).length;
+
+      const percent = Math.round((answers / total) * 100);
+      bar.style.width = percent + "%";
+      pct.textContent = `${answers}/${total}`;
+      status.textContent = (answers === total) ? "Можно проверить" : "Заполни все ответы";
+      hint.textContent = (answers === total) ? "Нажми «Проверить»" : "";
+    }
+
+    function resetMissingMarks() {
+      document.querySelectorAll(".qCard").forEach(card => card.classList.remove("markMissing"));
+    }
+
+    document.getElementById("quiz").addEventListener("change", () => {
+      clearResult();
+      resetMissingMarks();
+      updateProgress();
+    });
+
+    document.getElementById("check").addEventListener("click", async () => {
+      clearResult();
+      resetMissingMarks();
+
+      const total = 7;
+      const payload = {};
+      for (let i=1;i<=total;i++){
+        payload["q"+i] = selected("q"+i);
+      }
+
+      const unanswered = Object.keys(payload).filter(q => !payload[q]);
+      if (unanswered.length > 0) {
+        unanswered.forEach((q) => {
+          const n = q.replace("q", "");
+          const card = document.querySelector(".qCard[data-q='" + n + "']");
+          if (card) card.classList.add("markMissing");
+        });
+        setResult("bad", "Выбери все ответы", "Нужно ответить на каждый вопрос, затем нажать «Проверить».");
+        return;
+      }
+
+      const canonical = Array.from({length: total}, (_, i) => {
+        const k = "q" + (i+1);
+        return `${k}=${payload[k]}`;
+      }).join("|");
+
+      const hash = await sha256Hex(SALT + "::" + canonical);
+      const okAll = (hash === EXPECTED_HASH);
+
+      if (okAll) setResult("good", "Отлично!", "Все ответы верные. Результат: 7/7 (100%).");
+      else setResult("bad", "Есть ошибки", "Проверь ответы и попробуй ещё раз.");
+    });
+
+    document.getElementById("reset").addEventListener("click", () => {
+      clearResult();
+      resetMissingMarks();
+      updateProgress();
+      status.textContent = "Готово к прохождению";
+      hint.textContent = "";
+    });
+
+    updateProgress();
+  </script>
+</body>
+</html>
